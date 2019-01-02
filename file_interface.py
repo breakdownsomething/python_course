@@ -34,19 +34,19 @@ class File:
 
 
 
-f1 = File("/home/dm/Documents/python_course/src/test1.txt")
-f1.write('String for test1')
-f2 = File("/home/dm/Documents/python_course/src/test2.txt")
-f2.write('String for test2')
-f3 = f1 + f2
-print(f1)
-print(f2)
-print(f3)
-print(f1.read())
-print(f2.read())
-print(f3.read())
-# f1.write("String for test1")
-for line in File('file.txt'):
-    print(line)
-
-print(os.path.exists(f3))
+# f1 = File("/home/dm/Documents/python_course/src/test1.txt")
+# f1.write('String for test1')
+# f2 = File("/home/dm/Documents/python_course/src/test2.txt")
+# f2.write('String for test2')
+# f3 = f1 + f2
+# print(f1)
+# print(f2)
+# print(f3)
+# print(f1.read())
+# print(f2.read())
+# print(f3.read())
+# # f1.write("String for test1")
+# for line in File('file.txt'):
+#     print(line)
+#
+# print(os.path.exists(f3))

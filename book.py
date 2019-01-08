@@ -3,18 +3,22 @@ class BookIOErrors(Exception):
 
 
 class NotExistingExtensionError(BookIOErrors):
+    """если вызываемый метод у класса книги отсутствует"""
     pass
 
 
 class PermissionDeniedError(BookIOErrors):
+    """для ситуаций, когда запись в книгу запрещена,"""
     pass
 
 
 class PageNotFoundError(BookIOErrors):
+    """для ситуаций, когда методы обращаются к несуществующей странице"""
     pass
 
 
 class TooLongTextError(BookIOErrors):
+    """для ситуаций, когда записываемый текст не помещается на странице"""
     pass
 
 
@@ -42,6 +46,10 @@ class Novel(Book):
 
     def read(self, page):
         """возвращает страницу"""
+        try:
+            return self.content[page]
+        except IndexError:
+            raise PageNotFoundError
 
     def set_bookmark(self, person, page):
         """устанавливает закладку в книгу book"""
@@ -63,18 +71,48 @@ class Novel(Book):
 
     def write(self, page, text):
         """делает запись текста text на страницу page """
+        raise NotExistingExtensionError
 
 
 class Notebook(Book):
     """класс описывающий тетрадь и методы работы с ней"""
-
-    def __init__(self, title, size, max_sign, content):
+    # -- max_sign, максимальное количество знаков, которые можно написать на странице
+    # (целое, по умолчанию = 2000). В случае возникновения ситуаций, описанных в
+    # предыдущем задании, должны выбрасываться соответствующие исключения.
+    # -- size, количество страниц (по умолчанию - 12), если при создании экземпляра
+    # класса в параметре content передается не пустой список, значение этого атрибута
+    # устанавливается равной длине переданного списка. Если атрибут content не передан
+    # явно, то создается список пустых строк размером size.
+    def __init__(self, title, size=12, max_sign=2000, content=None):
         """конструктор"""
+
+        if content is None:
+            self.size = size
+            content = [] * size
+        else:
+            for page in content:
+                if len(page) > max_sign:
+                    raise TooLongTextError
+            self.size = len(content)
+        self.max_sign = max_sign
+
+        super().__init__(title, content)
 
     def read(self, page):
         """возвращает страницу с номером page"""
+        try:
+            return self.content[page]
+        except IndexError:
+            raise PageNotFoundError
 
     def write(self, page, text):
+        try:
+            if len(text) > self.max_sign:
+                raise TooLongTextError
+            else:
+                self.content[page] = text
+        except IndexError:
+            raise PageNotFoundError
         """делает запись текста text на страницу с номером page """
 
 

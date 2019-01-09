@@ -37,7 +37,7 @@ class Book:
 
 class Novel(Book):
     """класс описывающий книгу и методы работы с ней"""
-    def __init__(self, author, year, title, content):
+    def __init__(self, author, year, title, content=None):
         """конструктор"""
         super().__init__(title, content)
         self.author = author # имя автора (строка)
@@ -46,9 +46,9 @@ class Novel(Book):
 
     def read(self, page):
         """возвращает страницу"""
-        try:
+        if (page >= 0) and (page < len(self.content)):
             return self.content[page]
-        except IndexError:
+        else:
             raise PageNotFoundError
 
     def set_bookmark(self, person, page):
@@ -71,7 +71,7 @@ class Novel(Book):
 
     def write(self, page, text):
         """делает запись текста text на страницу page """
-        raise NotExistingExtensionError
+        raise PermissionDeniedError
 
 
 class Notebook(Book):
@@ -88,7 +88,7 @@ class Notebook(Book):
 
         if content is None:
             self.size = size
-            content = [] * size
+            content = [""] * size
         else:
             for page in content:
                 if len(page) > max_sign:
@@ -100,21 +100,21 @@ class Notebook(Book):
 
     def read(self, page):
         """возвращает страницу с номером page"""
-        try:
+        if (page >= 0) and (page < len(self.content)):
             return self.content[page]
-        except IndexError:
+        else:
             raise PageNotFoundError
 
     def write(self, page, text):
-        try:
-            if len(text) > self.max_sign:
+        if (page >= 0) and (page < len(self.content)):
+            new_text = self.content[page] + text
+            if len(new_text) > self.max_sign:
                 raise TooLongTextError
             else:
-                self.content[page] = text
-        except IndexError:
+                self.content[page] = new_text
+        else:
             raise PageNotFoundError
         """делает запись текста text на страницу с номером page """
-
 
 class Person:
     """класс описывающий человека и методы работы с книгой"""
@@ -125,23 +125,62 @@ class Person:
 
     def read(self, book, page):
         """читаем страницу с номером page в книге book"""
+        return book.read(page)
 
     def write(self, book, page, text):
         """пишем на страницу с номером page в книге book"""
+        book.write(page, text)
 
     def set_bookmark(self, book, page):
         """устанавливаем закладку в книгу book на страницу с номером page"""
-        book.set_bookmark(self, page)
+        try:
+            book.set_bookmark(self, page)
+        except AttributeError:
+            raise NotExistingExtensionError
 
     def get_bookmark(self, book):
         """получаем номер страницы установленной закладки в книге book"""
-        
+        try:
+            return book.get_bookmark(self)
+        except AttributeError:
+            raise NotExistingExtensionError
 
     def del_bookmark(self, book):
         """удаляет закладку из книги book"""
+        try:
+            book.del_bookmark(self)
+        except AttributeError:
+            raise NotExistingExtensionError
 
-
+person = Person('Igor')
 from string import ascii_lowercase as alphabet
 content = [sign for sign in alphabet]
-n = Novel('Grin', 1925, 'Gold chain', content)
-print(n.__dict__)
+novel = Novel('Grin', 1925, 'Gold chain')
+# novel = Novel('Grin', 1925, 'Gold chain', content)
+# print(n.__dict__)
+# print(n.size)
+# print(n.author)
+# print(n.year)
+# print(n.title)
+
+notebook = Notebook('note', 24, 100, content)
+
+# print(notebook.title)
+# print(notebook.max_sign)
+# print(notebook.size)
+# print(notebook.content)
+print(person.read(notebook, 0))
+print(person.read(notebook, -1))
+
+# print(person.read(notebook, 10))
+# person.write(notebook, 10, '+new_value')
+# print(person.read(notebook, 10))
+# print(person.read(notebook, 100))
+
+# too_long_text = alphabet * 1000
+# person.write(notebook, 0, too_long_text)
+# person.write(novel, 10, 'new_value')
+# person.set_bookmark(novel, 10)
+# print(person.get_bookmark(novel))
+# person.del_bookmark(novel)
+# print(person.get_bookmark(novel))

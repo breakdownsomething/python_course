@@ -73,9 +73,30 @@ class Novel(Book):
         """делает запись текста text на страницу page """
         raise PermissionDeniedError
 
+
 class NovelWithTable(Novel):
-    def __init__(self, author, year, title, content=None):
+    def __init__(self, author, year, title, content=None, table=None):
         super().__init__(self, author, year, title, content)
+        self.table = table or dict()
+
+    def search(self, chapter):
+        try:
+            return self.table[chapter]
+        except KeyError:
+            raise PageNotFoundError
+
+    def add_chapter(self, chapter, page):
+        if page in self.content:
+            self.table[chapter] = page
+        else:
+            raise PageNotFoundError
+
+    def remove_chapter(self, chapter):
+        try:
+            self.table.pop(chapter)
+        except KeyError:
+            raise PageNotFoundError
+
 
 
 class Notebook(Book):
@@ -155,4 +176,8 @@ class Person:
             book.del_bookmark(self)
         except AttributeError:
             raise NotExistingExtensionError
+
+
+class AdvancedPerson(Person):
+
 

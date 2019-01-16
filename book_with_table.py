@@ -73,6 +73,10 @@ class Novel(Book):
         """делает запись текста text на страницу page """
         raise PermissionDeniedError
 
+class NovelWithTable(Novel):
+    def __init__(self, author, year, title, content=None):
+        super().__init__(self, author, year, title, content)
+
 
 class Notebook(Book):
     """класс описывающий тетрадь и методы работы с ней"""
@@ -152,35 +156,3 @@ class Person:
         except AttributeError:
             raise NotExistingExtensionError
 
-person = Person('Igor')
-from string import ascii_lowercase as alphabet
-content = [sign for sign in alphabet]
-novel = Novel('Grin', 1925, 'Gold chain')
-# novel = Novel('Grin', 1925, 'Gold chain', content)
-# print(n.__dict__)
-# print(n.size)
-# print(n.author)
-# print(n.year)
-# print(n.title)
-
-notebook = Notebook('note', 24, 100, content)
-
-# print(notebook.title)
-# print(notebook.max_sign)
-# print(notebook.size)
-# print(notebook.content)
-print(person.read(notebook, 0))
-print(person.read(notebook, -1))
-
-# print(person.read(notebook, 10))
-# person.write(notebook, 10, '+new_value')
-# print(person.read(notebook, 10))
-# print(person.read(notebook, 100))
-
-# too_long_text = alphabet * 1000
-# person.write(notebook, 0, too_long_text)
-# person.write(novel, 10, 'new_value')
-# person.set_bookmark(novel, 10)
-# print(person.get_bookmark(novel))
-# person.del_bookmark(novel)
-# print(person.get_bookmark(novel))

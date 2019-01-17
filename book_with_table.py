@@ -179,5 +179,14 @@ class Person:
 
 
 class AdvancedPerson(Person):
+    def search(self, book, chapter):
+        pass
+
+    def read(self, book, page):
+        pass
+
+    def write(self, book, page, text):
+        pass
+
 
 

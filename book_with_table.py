@@ -74,31 +74,6 @@ class Novel(Book):
         raise PermissionDeniedError
 
 
-class NovelWithTable(Novel):
-    def __init__(self, author, year, title, content=None, table=None):
-        super().__init__(self, author, year, title, content)
-        self.table = table or dict()
-
-    def search(self, chapter):
-        try:
-            return self.table[chapter]
-        except KeyError:
-            raise PageNotFoundError
-
-    def add_chapter(self, chapter, page):
-        if page in self.content:
-            self.table[chapter] = page
-        else:
-            raise PageNotFoundError
-
-    def remove_chapter(self, chapter):
-        try:
-            self.table.pop(chapter)
-        except KeyError:
-            raise PageNotFoundError
-
-
-
 class Notebook(Book):
     """класс описывающий тетрадь и методы работы с ней"""
     # -- max_sign, максимальное количество знаков, которые можно написать на странице
@@ -177,16 +152,67 @@ class Person:
         except AttributeError:
             raise NotExistingExtensionError
 
+class NovelWithTable(Novel):
+    def __init__(self, author, year, title, content=None, table=None):
+        super().__init__(author, year, title, content)
+        self.table = table or dict()
+
+    def search(self, chapter):
+        try:
+            return self.table[chapter]
+        except KeyError:
+            raise PageNotFoundError
+
+    def add_chapter(self, chapter, page):
+        self.table[chapter] = page
+        # if page in self.content:
+        #     self.table[chapter] = page
+        # else:
+        #     raise PageNotFoundError
+
+    def remove_chapter(self, chapter):
+        self.table.pop(chapter)
+        # try:
+        #     self.table.pop(chapter)
+        # except KeyError:
+        #     raise PageNotFoundError
+
 
 class AdvancedPerson(Person):
+
     def search(self, book, chapter):
-        pass
+        try:
+            return book.search(chapter)
+        except NotImplementedError:
+            raise NotExistingExtensionError
 
     def read(self, book, page):
-        pass
+        if isinstance(page, str):
+            pn = self.search(book, page)
+        else:
+            pn = page
+        return super().read(book, pn)
 
     def write(self, book, page, text):
-        pass
+        if isinstance(page, str):
+            pn = self.search(book, page)
+        else:
+            pn = page
+        super().write(book, pn, text)
+
+person  = AdvancedPerson('Ivan')
+from string import ascii_lowercase as alphabet
+content = [sign for sign in alphabet]
+table = {'start_page': 0}
+novel = NovelWithTable('Grin', 1925, 'Gold chain', content, table)
+print(novel.table)
+print(person.search(novel, 'start_page'))
+# print(person.search(novel, 'non-exist_page'))
+novel.add_chapter('last_page', 26)
+print(person.search(novel, 'last_page'))
+novel.remove_chapter('start_page')
+print(novel.table)
+
 
 
 

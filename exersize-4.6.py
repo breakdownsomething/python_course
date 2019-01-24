@@ -25,8 +25,8 @@ class TooLongTextError(BookIOErrors):
 class Book:
     def __init__(self, title, content=None):
         self.title = title
-        self.content = content or []
-        self.size = len(self.content)
+        self._content = content or []
+        self.size = len(self._content)
 
     def read(self, page):
         raise NotImplementedError
@@ -35,13 +35,35 @@ class Book:
         raise NotImplementedError
 
     def __getitem__(self, item):
-        return self.content[item + 1]
+        if (item > 0) and (item <= len(self._content)):
+            return self._content[item - 1]
+        else:
+            raise PageNotFoundError
 
     def __setitem__(self, key, value):
-        self.content[key + 1] = value
+        if (key > 0) and (key <= len(self._content)):
+            self._content[key - 1] = value
+        else:
+            raise PageNotFoundError
 
     def __len__(self):
-        return len(self.content)
+        return len(self._content)
+
+    def __lt__(self, other):
+        return len(self) < len(other)
+
+    def __gt__(self, other):
+        return len(self) > len(other)
+
+    def __eq__(self, other):
+        return len(self) == len(other)
+
+    def __le__(self, other):
+        return len(self) <= len(other)
+
+    def __ge__(self, other):
+        return len(self) >= len(other)
+
 
 
 class Page:
@@ -52,15 +74,39 @@ class Page:
     def __len__(self):
         return len(self._text)
 
+    def __lt__(self, other):
+        return len(self) < len(other)
+
+    def __gt__(self, other):
+        return len(self) > len(other)
+
+    def __eq__(self, other):
+        return len(self) == len(other)
+
+    def __le__(self, other):
+        return len(self) <= len(other)
+
+    def __ge__(self, other):
+        return len(self) >= len(other)
+
     def __str__(self):
         return self._text
 
     def __iadd__(self, other):
-        new_text = self._text + other
-        if len(new_text) > self.max_sign:
-            raise TooLongTextError
-        self._text = new_text
-        return self
+        return self.__add__(other)
+
+    def __radd__(self, other):
+        return other + self._text
+
+    def __add__(self, other):
+        if isinstance(other, str) or isinstance(other, Page):
+            new_text = self._text + other
+            if len(new_text) > self.max_sign:
+                raise TooLongTextError
+            self._text = new_text
+            return self
+        else:
+            raise TypeError
 
 
 class Novel(Book):
@@ -74,8 +120,8 @@ class Novel(Book):
 
     def read(self, page):
         """возвращает страницу"""
-        if (page >= 0) and (page < len(self.content)):
-            return self.content[page]
+        if (page >= 0) and (page < len(self._content)):
+            return self._content[page]
         else:
             raise PageNotFoundError
 
@@ -222,11 +268,15 @@ class AdvancedPerson(Person):
             pn = page
         super().write(book, pn, text)
 
-page = Page('text')
-page += '_new_text'
-print(page)
-s = 'string_' + page
-print(type(s))
 
 
+content = [Page('Page {}'.format(str(num))) for num in range(1,10)]
+# print(content)
+book = Book('my_book',content)
+# print(len(book))
+# print(book[1])
+book[9] = 'Last page'
+book2 = Book('book2')
+# type(book[9])
+print(book2 == book)
 

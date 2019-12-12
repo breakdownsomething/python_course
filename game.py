@@ -13,18 +13,23 @@ class Vec2d:
         self.y = y
 
     def __add__(self, other):
+        """"возвращает сумму двух векторов"""
         return Vec2d(self.x + other.x, self.y + other.y)
 
     def __sub__(self, other):
+        """"возвращает разность двух векторов"""
         return Vec2d(self.x - other.x, self.y - other.y)
 
     def __mul__(self, other):
+        """возвращает произведение вектора на число"""
         return Vec2d(self.x * other, self.y * other)
 
     def __len__(self):
-        return pow((self.x * self.x + self.y * self.y),0.5)
+        """возвращает длину вектора"""
+        return pow((self.x * self.x + self.y * self.y), 0.5)
 
     def int_pair(self):
+        """ возвращает кортеж из двух целых чисел (текущие координаты вектора)"""
         return self.x, self.y
 
 
@@ -49,32 +54,45 @@ class Polyline:
         self.points.append(point)
 
     def set_points(self):
+        """функция перерасчета координат опорных точек"""
         for p in self.points:
             p.move()
 
     def draw_points(self, game_display, width=3, color=(255, 255, 255)):
+        """функция отрисовки точек на экране"""
         for p in self.points:
             pygame.draw.circle(game_display, color,
-                                  (int(p.location.x), int(p.location.y)), width)
+                               (int(p.location.x), int(p.location.y)), width)
 
+
+class Knot(Polyline):
     def draw_smooth_line(self, game_display, colour, width, count):
-        if len(self.points) >= 3:
-            res = []
-            for i in range(-2, len(self.points) - 2):
-                ptn = [(self.points[i].location + self.points[i + 1].location) * 0.5, self.points[i + 1].location,
-                       (self.points[i + 1].location + self.points[i + 2].location) * 0.5]
-                res.extend(Polyline.get_points(ptn, count))
-            for p_n in range(-1, len(res) - 1):
-                pygame.draw.line(game_display, colour,
-                                 (int(res[p_n].x), int(res[p_n].y)),
-                                 (int(res[p_n + 1].x), int(res[p_n + 1].y)), width)
+        """функция отрисовки плавной кривой на экране"""
+        res = self.get_knot(count)
+        for p_n in range(-1, len(res) - 1):
+            pygame.draw.line(game_display, colour,
+                             (int(res[p_n].x), int(res[p_n].y)),
+                             (int(res[p_n + 1].x), int(res[p_n + 1].y)), width)
+
+    # =======================================================================================
+    # Функции, отвечающие за расчет сглаживания ломаной
+    # =======================================================================================
+    def get_knot(self, count):
+        if len(self.points) < 3:
+            return []
+        res = []
+        for i in range(-2, len(self.points) - 2):
+            ptn = [(self.points[i].location + self.points[i + 1].location) * 0.5, self.points[i + 1].location,
+                   (self.points[i + 1].location + self.points[i + 2].location) * 0.5]
+            res.extend(Knot.get_points(ptn, count))
+        return res
 
     @staticmethod
     def get_points(base_points, count):
         alpha = 1 / count
         res = []
         for i in range(count):
-            res.append(Polyline.get_point(base_points, i * alpha))
+            res.append(Knot.get_point(base_points, i * alpha))
         return res
 
     @staticmethod
@@ -83,7 +101,7 @@ class Polyline:
             deg = len(points) - 1
         if deg == 0:
             return points[0]
-        return points[deg] * alpha + Polyline.get_point(points, alpha, deg - 1) * (1 - alpha)
+        return points[deg] * alpha + Knot.get_point(points, alpha, deg - 1) * (1 - alpha)
 
 
 class Application:
@@ -93,7 +111,7 @@ class Application:
         pygame.display.set_caption(caption)
         self.steps = 35
         self.working = True
-        self.line = Polyline()
+        self.line = Knot()
         self.pause = True
         self.show_help = False
         self.hue = 0
@@ -140,6 +158,7 @@ class Application:
         pygame.quit()
 
     def draw_help(self):
+        """функция отрисовки экрана справки программы"""
         self.gameDisplay.fill((50, 50, 50))
         font1 = pygame.font.SysFont("courier", 24)
         font2 = pygame.font.SysFont("serif", 24)

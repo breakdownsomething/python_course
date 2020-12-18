@@ -1,10 +1,12 @@
 import random as rn
+import datetime as dt
 
-stopped = False
 signs = ['+', '-']
 err = 0
+count = 2
+start = dt.datetime.now()
 
-for i in range(1, 21):
+for i in range(1, count+1):
     rn.seed()
     sign = rn.choice(signs)
     if sign == signs[0]:
@@ -15,7 +17,8 @@ for i in range(1, 21):
         a = rn.randint(30, 100)
         b = rn.randint(10, a)
         c = a - b
-    print( a, sign, b, '= ?')
+    print()
+    print(str(i)+'('+str(count)+').', a, sign, b, '= ?')
     while True:
         c_ = None
         try:
@@ -30,3 +33,4 @@ for i in range(1, 21):
             break
 print('Примеры закончились')
 print('Количество неправильных ответов', err)
+print('потрачено времени', dt.datetime.now() - start)
